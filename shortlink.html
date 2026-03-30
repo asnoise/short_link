@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jonom Digital | Short Links</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-red: #d90429;
+            --dark-red: #9e031e;
+            --white: #ffffff;
+            --light-bg: #f8f9fa;
+            --text-dark: #2b2d42;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            margin-top: 20px;
+        }
+
+        header h1 {
+            color: var(--primary-red);
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        /* Main Container */
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--white);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        /* Input Section */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input[type="url"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="url"]:focus {
+            border-color: var(--primary-red);
+        }
+
+        button#shorten-btn {
+            background-color: var(--primary-red);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button#shorten-btn:hover {
+            background-color: var(--dark-red);
+        }
+
+        button#shorten-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Result Section */
+        #result-container {
+            margin-top: 25px;
+            padding: 20px;
+            background: #fff5f5;
+            border-left: 5px solid var(--primary-red);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            word-break: break-all;
+        }
+
+        .result-link a {
+            color: var(--primary-red);
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+
+        .copy-btn {
+            background: var(--text-dark);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+
+        /* History Section */
+        .history {
+            margin-top: 40px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .history h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+        }
+
+        .history-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            font-size: 0.9rem;
+        }
+
+        .history-item .long-url {
+            color: #888;
+            max-width: 60%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Error Message */
+        #error-msg {
+            color: var(--primary-red);
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 480px) {
+            header h1 { font-size: 1.8rem; }
+            .container { padding: 20px; }
+            .result-link { flex-direction: column; gap: 10px; }
+            .copy-btn { width: 100%; margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Jonom Digital</h1>
+        <p>Fast & Free URL Shortener</p>
+    </header>
+
+    <div class="container">
+        <div class="input-group">
+            <input type="url" id="url-input" placeholder="Paste your long URL here (e.g., https://example.com)" required>
+            <button id="shorten-btn">Shorten URL</button>
+        </div>
+        <p id="error-msg">Please enter a valid URL (including http:// or https://)</p>
+
+        <div id="result-container">
+            <div class="result-link">
+                <a href="#" id="short-url" target="_blank"></a>
+                <button class="copy-btn" onclick="copyToClipboard()">Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="history" id="history-section" style="display: none;">
+        <h3>Recent Links</h3>
+        <div id="history-list"></div>
+    </div>
+
+    <script>
+        const urlInput = document.getElementById('url-input');
+        const shortenBtn = document.getElementById('shorten-btn');
+        const resultContainer = document.getElementById('result-container');
+        const shortUrlElement = document.getElementById('short-url');
+        const errorMsg = document.getElementById('error-msg');
+        const historyList = document.getElementById('history-list');
+        const historySection = document.getElementById('history-section');
+
+        // Load history on startup
+        window.onload = displayHistory;
+
+        shortenBtn.addEventListener('click', async () => {
+            const longUrl = urlInput.value.trim();
+            
+            // Basic URL Validation
+            if (!longUrl || !longUrl.startsWith('http')) {
+                showError(true);
+                return;
+            }
+
+            showError(false);
+            shortenBtn.disabled = true;
+            shortenBtn.innerText = "Shortening...";
+
+            try {
+                // Using TinyURL API via a public CORS proxy
+                const response = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
+                
+                if (response.ok) {
+                    const shortUrl = await response.text();
+                    displayResult(shortUrl);
+                    saveToHistory(longUrl, shortUrl);
+                } else {
+                    throw new Error("API Error");
+                }
+            } catch (err) {
+                alert("Something went wrong. Please try again later.");
+            } finally {
+                shortenBtn.disabled = false;
+                shortenBtn.innerText = "Shorten URL";
+            }
+        });
+
+        function displayResult(url) {
+            resultContainer.style.display = 'block';
+            shortUrlElement.href = url;
+            shortUrlElement.innerText = url;
+        }
+
+        function showError(show) {
+            errorMsg.style.display = show ? 'block' : 'none';
+            urlInput.style.borderColor = show ? 'var(--primary-red)' : '#ddd';
+        }
+
+        function copyToClipboard() {
+            const text = shortUrlElement.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const copyBtn = document.querySelector('.copy-btn');
+                copyBtn.innerText = "Copied!";
+                copyBtn.style.background = "#28a745";
+                setTimeout(() => {
+                    copyBtn.innerText = "Copy";
+                    copyBtn.style.background = "var(--text-dark)";
+                }, 2000);
+            });
+        }
+
+        function saveToHistory(long, short) {
+            let history = JSON.parse(localStorage.getItem('jonom_links')) || [];
+            
+            // Add new link to the start
+            history.unshift({ long, short });
+            
+            // Keep only last 3
+            if (history.length > 3) history.pop();
+            
+            localStorage.setItem('jonom_links', JSON.stringify(history));
+            displayHistory();
+        }
+
+        function displayHistory() {
+            const history = JSON.parse(localStorage.getItem('jonom_links')) || [];
+            if (history.length === 0) {
+                historySection.style.display = 'none';
+                return;
+            }
+
+            historySection.style.display = 'block';
+            historyList.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <span class="long-url">${item.long}</span>
+                    <a href="${item.short}" target="_blank" style="color: var(--primary-red); font-weight:600; text-decoration:none;">${item.short}</a>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
