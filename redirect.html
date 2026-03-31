@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jonom Digital | Redirecting...</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { background: #f8f9fa; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; font-family: 'Poppins', sans-serif; text-align: center; }
+        .wait-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        #timer { font-size: 3rem; font-weight: 700; color: #d90429; }
+        .poster-link { display: block; width: 100%; max-width: 1376px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden; }
+        .poster-link img { width: 100%; height: auto; display: block; }
+        h2 { color: #2b2d42; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="wait-box">
+        <h2>Your Link is Ready in...</h2>
+        <div id="timer">15</div>
+        <p>Please wait while we process your request.</p>
+    </div>
+
+    <!-- The Poster Clickable to Jonom Digital -->
+    <a href="https://jonomdigital.xyz" target="_blank" class="poster-link">
+        <img src="image.png" alt="Visit Jonom Digital" title="Click to Visit Jonom Digital">
+    </a>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUrl = urlParams.get('target');
+
+        // Safety redirect back to home if no URL found
+        if (!targetUrl) {
+            window.location.href = 'index.html';
+        }
+
+        let timeLeft = 15;
+        const timerDisplay = document.getElementById('timer');
+
+        const countdown = setInterval(() => {
+            timeLeft--;
+            timerDisplay.innerText = timeLeft;
+
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                window.location.href = targetUrl;
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
